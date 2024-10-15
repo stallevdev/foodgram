@@ -3,13 +3,14 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import CustomUserViewSet, TagViewSet
+from .views import CustomUserViewSet, IngredientViewSet, TagViewSet
 
 app_name = 'api'
 
 router = routers.DefaultRouter()
 router.register('users', CustomUserViewSet, basename='user')
 router.register('tags', TagViewSet, basename='tag')
+router.register('ingredients', IngredientViewSet, basename='ingredient')
 
 urlpatterns = [
     path('', include(router.urls)),
