@@ -6,6 +6,7 @@ from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
+from recipes.models import Tag
 from users.models import Subscriber, User
 
 
@@ -80,3 +81,13 @@ class AvatarSerializer(serializers.ModelSerializer):
 
         model = User
         fields = ('avatar',)
+
+
+class TagSerializer(serializers.ModelSerializer):
+    """Сериализатор тегов."""
+
+    class Meta:
+        """Мета."""
+
+        model = Tag
+        fields = ('id', 'name', 'slug')
