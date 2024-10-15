@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
-from recipes.models import Tag
+from recipes.models import Ingredient, RecipeIngredient, Tag
 from users.models import Subscriber, User
 
 
@@ -91,3 +91,41 @@ class TagSerializer(serializers.ModelSerializer):
 
         model = Tag
         fields = ('id', 'name', 'slug')
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    """Сериализатор ингредиентов."""
+
+    class Meta:
+        """Мета."""
+
+        model = Ingredient
+        fields = ('id', 'name', 'measurement_unit')
+
+
+class IngredientRecipeReadSerializer(serializers.ModelSerializer):
+    """Сериализатор для чтения ингредиентов рецепта."""
+
+    id = serializers.ReadOnlyField(source='ingredient.id')
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit'
+    )
+
+    class Meta:
+        """Мета."""
+
+        model = RecipeIngredient
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+
+
+class IngredientRecipeWriteSerializer(serializers.ModelSerializer):
+    """Сериализатор для записи ингредиентов рецепта."""
+
+    id = serializers.IntegerField()
+
+    class Meta:
+        """Мета."""
+
+        model = RecipeIngredient
+        fields = ('id', 'amount')
