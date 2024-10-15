@@ -1,15 +1,17 @@
 """Вьюсеты для API-приложения."""
 
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from recipes.models import Tag
+from recipes.models import Ingredient, Tag
 
+from .filters import IngredientFilterSet
 from .paginations import Pagination
-from .serializers import AvatarSerializer, TagSerializer
+from .serializers import AvatarSerializer, IngredientSerializer, TagSerializer
 
 
 class CustomUserViewSet(UserViewSet):
@@ -69,3 +71,15 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TagSerializer
     pagination_class = None
     permission_classes = [AllowAny]
+
+
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    """Вьюсет для ингредиентов."""
+
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    pagination_class = None
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = IngredientFilterSet
+    permission_classes = [AllowAny]
+    search_fields = ('^name',)
