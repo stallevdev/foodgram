@@ -1,0 +1,12 @@
+black==24.10.0
+Django==4.2.20
+django-filter==23.2
+django-import-export==3.2.0
+djangorestframework==3.16.0
+djoser==2.1.0
+flake8==6.0.0
+gunicorn==20.1.0
+isort==5.12.0
+Pillow==9.0.0
+python-dotenv==1.1.0
+psycopg2-binary==2.9.3
