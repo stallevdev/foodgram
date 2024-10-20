@@ -4,11 +4,10 @@ import base64
 
 from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer
-from rest_framework import serializers
-from rest_framework.reverse import reverse
-
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
                             RecipeIngredient, RecipeTag, ShoppingCart, Tag)
+from rest_framework import serializers
+from rest_framework.reverse import reverse
 from urlshort.models import ShortLink
 from users.models import Subscriber, User
 
