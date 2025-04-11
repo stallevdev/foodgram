@@ -1,2 +1,1 @@
-# foodgram
-Проект: foodgram
+# Фудграм
