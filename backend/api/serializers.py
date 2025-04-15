@@ -68,3 +68,15 @@ class CustomUserCreateSerializer(CustomUserSerializer):
             'last_name',
             'password',
         )
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    """Сериализатор аватара пользователя."""
+
+    avatar = Base64ImageField(allow_null=True, label='Аватар')
+
+    class Meta:
+        """Мета."""
+
+        model = User
+        fields = ('avatar',)
