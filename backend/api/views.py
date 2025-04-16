@@ -1,13 +1,15 @@
 """Вьюсеты для API-приложения."""
 
 from djoser.views import UserViewSet
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from recipes.models import Tag
+
 from .paginations import Pagination
-from .serializers import AvatarSerializer
+from .serializers import AvatarSerializer, TagSerializer
 
 
 class CustomUserViewSet(UserViewSet):
@@ -58,3 +60,12 @@ class CustomUserViewSet(UserViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
         return serializer
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    """Вьюсет для тегов."""
+
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
+    permission_classes = [AllowAny]
