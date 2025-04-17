@@ -12,6 +12,8 @@ from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
 from urlshort.models import ShortLink
 from users.models import Subscriber, User
 
+from foodgram.constants import PAGES_LIMIT_DEFAULT
+
 
 class Base64ImageField(serializers.ImageField):
     """Поле для обработки изображений в Base64 формате."""
@@ -325,6 +327,84 @@ class RecipeSummarySerializer(serializers.ModelSerializer):
 
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class SubscriberDetailSerializer(serializers.ModelSerializer):
+    """Сериализатор подписчика с детальной информацией."""
+
+    email = serializers.ReadOnlyField(source='author.email')
+    id = serializers.ReadOnlyField(source='author.id')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+    avatar = Base64ImageField(source='author.avatar')
+
+    class Meta:
+        """Мета."""
+
+        model = Subscriber
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
+            'avatar',
+        )
+
+    def get_is_subscribed(self, obj):
+        """Проверка подписки на автора."""
+
+        user = self.context.get('request').user
+        return Subscriber.objects.filter(author=obj.author, user=user).exists()
+
+    def get_recipes(self, obj):
+        """Получение рецептов автора."""
+
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit', PAGES_LIMIT_DEFAULT)
+        try:
+            limit = int(limit)
+        except ValueError:
+            pass
+        return RecipeSummarySerializer(
+            Recipe.objects.filter(author=obj.author)[:limit],
+            many=True,
+            context={'request': request},
+        ).data
+
+    def get_recipes_count(self, obj):
+        """Количество рецептов у автора."""
+
+        return Recipe.objects.filter(author=obj.author).count()
+
+
+class SubscriberSerializer(serializers.ModelSerializer):
+    """Сериализатор подписки."""
+
+    class Meta:
+        """Мета."""
+
+        model = Subscriber
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        return SubscriberDetailSerializer(instance, context=self.context).data
+
+    def validate_author(self, value):
+        """Проверка подписки на себя."""
+
+        if self.context['request'].user == value:
+            raise serializers.ValidationError(
+                'Нельзя подписываться на самого себя.'
+            )
+        return value
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):

@@ -15,13 +15,15 @@ from rest_framework.reverse import reverse
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart, Tag)
 from urlshort.models import ShortLink
+from users.models import Subscriber, User
 
 from .filters import IngredientFilterSet, RecipeFilterSet
 from .paginations import Pagination
 from .permissions import IsAuthorAdminOrReadOnly
 from .serializers import (AvatarSerializer, FavoriteRecipeSerializer,
                           IngredientSerializer, RecipeReadSerializer,
-                          RecipeWriteSerializer, TagSerializer,
+                          RecipeWriteSerializer, SubscriberDetailSerializer,
+                          SubscriberSerializer, TagSerializer,
                           UrlshortSerializer)
 
 
@@ -73,6 +75,53 @@ class CustomUserViewSet(UserViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
         return serializer
+
+    @action(
+        detail=False,
+        methods=['GET'],
+        permission_classes=[IsAuthenticated],
+        url_path='subscriptions',
+        url_name='subscriptions',
+    )
+    def subscriptions(self, request):
+        """Получение подписок пользователя."""
+
+        subscriptions = Subscriber.objects.filter(user=request.user)
+        pages = self.paginate_queryset(subscriptions)
+        serializer = SubscriberDetailSerializer(
+            pages, many=True, context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=['POST', 'DELETE'],
+        permission_classes=[IsAuthenticated],
+        url_path=r'(?P<id>\d+)/subscribe',
+        url_name='subscribe',
+    )
+    def subscribe(self, request, id):
+        """Подписка/отписка от автора."""
+
+        author = get_object_or_404(User, id=id)
+        data = {'author': author.id, 'user': request.user.id}
+        if request.method == 'POST':
+            serializer = SubscriberSerializer(
+                data=data, context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        elif request.method == 'DELETE':
+            subscription, _ = Subscriber.objects.filter(
+                author=author.id, user=request.user.id
+            ).delete()
+            if subscription:
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(
+                {'detail': 'Подписка не найдена.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
