@@ -5,8 +5,8 @@
 
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
-
 from users.models import User
+
 from foodgram.constants import (AMOUNT_MIN, COOKING_MIN_TIME,
                                 INGREDIENT_MAX_LENGTH, RECIPE_MAX_LENGTH,
                                 SLUG_REGEXVALIDATOR, TAG_MAX_LENGTH,
